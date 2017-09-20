@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Symfony\Component\Console\Input\InputArgument;
+use \App\Events\NotifyStatus;
 
 class StationCheck extends Command {
 
@@ -54,14 +55,19 @@ class StationCheck extends Command {
             return;
         }
 
-
         if($status['available'] == 0) {
-            $this->warning('The station is empty. Go to an alternate station.');
+            $message = "Station $station is empty. Go to an alternate station.";
+            $this->warning($message);
         } elseif($status['available'] <= 3) {
-            $this->warning('The station might be empty soon. Proceed at your own risk.');
+            $message = "Station $station might be empty soon. Proceed at your own risk.";
+            $this->warning($message);
         } else {
+            $message = "Station $station has bikes to spare.";
             $this->info('The station has bikes to spare.');
         }
+
+        event(new NotifyStatus($message));
+        $this->info('Status notified.');
 
         $headers = ['Available', 'Free'];
         $rows = [
