@@ -1,6 +1,6 @@
 # Bikes
 
-Fun little projected I created to familiarize myself with the __Lumen framework__.
+Fun little project I created to familiarize myself with the __Lumen framework__.
 It's a simple API that checks the current status of a __Valenbisi__ bike rental station,
 although other services could be added. It can be combined with __IFTT__ to receive 
 notifications when you enter or exit a location or at specific times of the day.
