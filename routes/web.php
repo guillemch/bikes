@@ -12,5 +12,7 @@
 */
 
 $router->get('/', function () use ($router) {
-    return $router->app->version();
+    return 'App';
 });
+
+$router->get('/api/station/{station}/{action}', 'ApiController@station');

@@ -43,7 +43,9 @@ class NotifyStatusListener
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
         $output = curl_exec($ch);
-        $info = curl_getinfo($ch);
+        if(curl_errno($ch)){
+            throw new \Exception('Failed attempting to notify station info.');
+        }
         curl_close ($ch);
     }
 

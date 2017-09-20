@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 use \App\Events\NotifyStatus;
 
 class StationCheck extends Command {
@@ -46,6 +47,9 @@ class StationCheck extends Command {
         $station = $this->argument('station');
         $this->station = $station;
 
+        $to = $this->option('to');
+        $notify = $this->option('notify');
+
         $xml = $this->getStationInfo();
         $status = simplexml_load_string($xml);
         $status = (array)$status;
@@ -55,19 +59,34 @@ class StationCheck extends Command {
             return;
         }
 
-        if($status['available'] == 0) {
-            $message = "Station $station is empty. Go to an alternate station.";
-            $this->warning($message);
-        } elseif($status['available'] <= 3) {
-            $message = "Station $station might be empty soon. Proceed at your own risk.";
-            $this->warning($message);
+        if($to == 'park'){
+            if($status['free'] == 0) {
+                $message = "Station $station is full. Go to an alternative station.";
+                $this->error($message);
+            } elseif($status['free'] <= 3) {
+                $message = "Station $station might be full soon. Proceed at your own risk.";
+                $this->error($message);
+            } else {
+                $message = "Station $station has free spots to spare.";
+                $this->info($message);
+            }
         } else {
-            $message = "Station $station has bikes to spare.";
-            $this->info('The station has bikes to spare.');
+            if($status['available'] == 0) {
+                $message = "Station $station is empty. Go to an alternative station.";
+                $this->error($message);
+            } elseif($status['available'] <= 3) {
+                $message = "Station $station might be empty soon. Proceed at your own risk.";
+                $this->error($message);
+            } else {
+                $message = "Station $station has bikes to spare.";
+                $this->info($message);
+            }
         }
 
-        event(new NotifyStatus($message));
-        $this->info('Status notified.');
+        if($notify) {
+            event(new NotifyStatus($message));
+            $this->info('Status notified.');
+        }
 
         $headers = ['Available', 'Free'];
         $rows = [
@@ -92,6 +111,19 @@ class StationCheck extends Command {
         ];
     }
 
+    /**
+     * Get the console options.
+     *
+     * @return array
+     */
+    protected function getOptions()
+    {
+        return [
+            ['to', null, InputOption::VALUE_OPTIONAL, 'Wether we\'d like to rent or park a bike', 'rent'],
+            ['notify', null, InputOption::VALUE_NONE, 'Notify the response'],
+        ];
+    }
+
     protected function getStationInfo()
     {
         $url = $this->url . $this->station;
@@ -100,9 +132,10 @@ class StationCheck extends Command {
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/xml'));
         curl_setopt($ch, CURLOPT_URL,$url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        $output = curl_exec ($ch);
-        $info = curl_getinfo($ch);
-        $http_result = $info ['http_code'];
+        $output = curl_exec($ch);
+        if(curl_errno($ch)){
+            throw new \Exception('Failed attempting to retreive station info.');
+        }
         curl_close ($ch);
 
         return $output;
