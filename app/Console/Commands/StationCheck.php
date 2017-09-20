@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use \App\Events\NotifyStatus;
+use \App\Library\Valenbisi;
 
 class StationCheck extends Command {
 
@@ -24,20 +25,6 @@ class StationCheck extends Command {
     protected $description = 'Returns available bikes and parking spots at the specified station';
 
     /**
-     * The station ID
-     *
-     * @var string
-     */
-    protected $station;
-
-    /**
-     * The API endpoint
-     *
-     * @var string
-     */
-    protected $url = 'http://www.valenbisi.es/service/stationdetails/valence/';
-
-    /**
      * Execute the console command.
      *
      * @return void
@@ -45,14 +32,11 @@ class StationCheck extends Command {
     public function handle()
     {
         $station = $this->argument('station');
-        $this->station = $station;
-
         $to = $this->option('to');
         $notify = $this->option('notify');
 
-        $xml = $this->getStationInfo();
-        $status = simplexml_load_string($xml);
-        $status = (array)$status;
+        $valenbisi = new Valenbisi();
+        $status = (array) $valenbisi->getStation($station);
 
         if(!isset($status['available'])) {
             $this->error('The station was not found.');
@@ -61,24 +45,24 @@ class StationCheck extends Command {
 
         if($to == 'park'){
             if($status['free'] == 0) {
-                $message = "Station $station is full. Go to an alternative station.";
+                $message = "Station #$station is full. Go to an alternative station.";
                 $this->error($message);
             } elseif($status['free'] <= 3) {
-                $message = "Station $station might be full soon. Proceed at your own risk.";
+                $message = "Only " . $status['free'] . " available spots to park at station #$station. Proceed at your own risk.";
                 $this->error($message);
             } else {
-                $message = "Station $station has free spots to spare.";
+                $message = "Station #$station has " . $status['free'] . " parking spots.";
                 $this->info($message);
             }
         } else {
             if($status['available'] == 0) {
-                $message = "Station $station is empty. Go to an alternative station.";
+                $message = "Station #$station is empty. Go to an alternative station.";
                 $this->error($message);
             } elseif($status['available'] <= 3) {
-                $message = "Station $station might be empty soon. Proceed at your own risk.";
+                $message = "Only " . $status['free'] . " available bikes at station #$station. Proceed at your own risk.";
                 $this->error($message);
             } else {
-                $message = "Station $station has bikes to spare.";
+                $message = "Station #$station has " . $status['free'] . " bikes.";
                 $this->info($message);
             }
         }
@@ -123,22 +107,4 @@ class StationCheck extends Command {
             ['notify', null, InputOption::VALUE_NONE, 'Notify the response'],
         ];
     }
-
-    protected function getStationInfo()
-    {
-        $url = $this->url . $this->station;
-
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/xml'));
-        curl_setopt($ch, CURLOPT_URL,$url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        $output = curl_exec($ch);
-        if(curl_errno($ch)){
-            throw new \Exception('Failed attempting to retreive station info.');
-        }
-        curl_close ($ch);
-
-        return $output;
-    }
-
 }
