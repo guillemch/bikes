@@ -5,23 +5,23 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
-use App\Station;
+use App\Zone;
 
-class StationCheck extends Command {
+class ZoneCheck extends Command {
 
     /**
      * The console command name.
      *
      * @var string
      */
-    protected $name = 'station:check';
+    protected $name = 'zone:check';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Returns available bikes and parking spots at the specified station';
+    protected $description = 'Returns available bikes and parking spots for specified stations';
 
     /**
      * Execute the console command.
@@ -30,24 +30,26 @@ class StationCheck extends Command {
      */
     public function handle()
     {
-        $station = $this->argument('station');
+        $stations = $this->argument('stations');
         $to = $this->option('to');
         $notify = $this->option('notify');
 
-        $station = new Station($station);
-        $status = $station->getStatus();
-        $message = $station->getNotificationMessage($to);
+        $zone = new Zone($stations);
+        $statuses = $zone->getStatuses();
+        $message = $zone->getNotificationMessage($to);
 
         if($notify) {
-            $station->notify($to);
+            $zone->notify($to);
         }
 
         $this->info($message);
 
-        $headers = ['Bikes', 'Docks'];
-        $rows = [
-            [$status->available, $status->free]
-        ];
+        $headers = ['Station', 'Bikes', 'Docks'];
+        $rows = [];
+
+        foreach($statuses as $id => $station) {
+            $rows[] = ['#' . $id, $station->available, $station->free];
+        }
 
         $this->table($headers, $rows);
     }
@@ -60,7 +62,7 @@ class StationCheck extends Command {
     protected function getArguments()
     {
         return [
-            ['station', InputArgument::REQUIRED, 'The ID of the station.'],
+            ['stations', InputArgument::REQUIRED, 'The IDs of the station.'],
         ];
     }
 

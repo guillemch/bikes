@@ -15,4 +15,5 @@ $router->get('/', function () use ($router) {
     return 'App';
 });
 
-$router->get('/api/station/{station}/{action}', 'ApiController@station');
+$router->get('/api/station/{station}/{intent}', 'ApiController@station');
+$router->get('/api/zone/{stations}/{intent}', 'ApiController@zone');
