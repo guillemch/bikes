@@ -62,16 +62,18 @@ class Station
      */
     public function notificationMessage($intent = 'rent')
     {
-        $word = ($intent == 'rent') ? 'bikes' : 'docks';
         $key = ($intent == 'rent') ? 'available' : 'free';
         $number = $this->status($key);
 
         if($number == 0) {
-            $message = "Station #$this->id has no available $word.";
+            $word = $this->word($intent, $number);
+            $message = "Station #$this->id has no $key $word.";
         } elseif($number <= 3) {
+            $word = $this->word($intent, $number);
             $message = "Only $number $word left at Station #$this->id. Hurry!";
         } else {
-            $message = "Station #$this->id has $number available $word to $intent.";
+            $word = $this->word($intent, $number);
+            $message = "Station #$this->id has $number $key $word.";
         }
 
         return $message;
@@ -100,5 +102,16 @@ class Station
         $this->status = $valenbisi->getStation($this->id);
 
         return $this;
+    }
+
+    private function word($intent = 'rent', $number)
+    {
+        $words = [
+            'rent' => ['singular' => 'bike', 'plural' => 'bikes'],
+            'park' => ['singular' => 'dock', 'plural' => 'docks']
+        ];
+        $key = ($number == 1) ? 'singular' : 'plural';
+
+        return $words[$intent][$key];
     }
 }
