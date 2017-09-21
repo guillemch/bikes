@@ -35,8 +35,8 @@ class StationCheck extends Command {
         $notify = $this->option('notify');
 
         $station = new Station($station);
-        $status = $station->getStatus();
-        $message = $station->getNotificationMessage($to);
+        $status = $station->status();
+        $message = $station->notificationMessage($to);
 
         if($notify) {
             $station->notify($to);

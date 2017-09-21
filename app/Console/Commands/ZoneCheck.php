@@ -35,8 +35,8 @@ class ZoneCheck extends Command {
         $notify = $this->option('notify');
 
         $zone = new Zone($stations);
-        $statuses = $zone->getStatuses();
-        $message = $zone->getNotificationMessage($to);
+        $statuses = $zone->statuses();
+        $message = $zone->notificationMessage($to);
 
         if($notify) {
             $zone->notify($to);
