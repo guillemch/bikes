@@ -60,17 +60,22 @@ class Station
      *
      * @return string
      */
-    public function notificationMessage($intent = 'rent')
+    public function notificationMessage($intent = 'rent', $single = true)
     {
         $key = ($intent == 'rent') ? 'available' : 'free';
         $number = $this->status($key);
 
-        if($number == 0) {
+        if($this->status('open') == 0) {
+            $message = "Station #$this->id is out of order.";
+            if($single) $message .= " Go to an alternative station.";
+        } elseif($number == 0) {
             $word = $this->word($intent, $number);
             $message = "Station #$this->id has no $key $word.";
+            if($single) $message .= " Go to an alternative station.";
         } elseif($number <= 3) {
             $word = $this->word($intent, $number);
-            $message = "Only $number $word left at Station #$this->id. Hurry!";
+            $message = "Only $number $word left at Station #$this->id.";
+            if($single) $message .= "Hurry!";
         } else {
             $word = $this->word($intent, $number);
             $message = "Station #$this->id has $number $key $word.";

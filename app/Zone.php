@@ -61,6 +61,7 @@ class Zone
         $message = [];
         $key = ($intent == 'rent') ? 'available' : 'free';
         $i = 0;
+        $total = count($this->statuses);
 
         foreach($this->statuses as $station) {
             $i++;
@@ -69,10 +70,17 @@ class Zone
             $but = ($station->status($key) > 3 && $i != 1) ? 'But ' : '';
 
             // Push message
-            $message[] = $but . $station->notificationMessage($intent);
+            $message[] = $but . $station->notificationMessage($intent, false);
 
             // If we've reached a station with enough bikes/docks, stop composing.
-            if($station->status($key) > 3) break;
+            if($station->status($key) > 3) {
+                break;
+            }
+
+            // If no station had bikes/docks, add final message
+            if($station->status($key) == 0 && $i == $total) {
+                $message[] = 'Search for alternative stations.';
+            }
         }
 
         return implode(' ', $message);
