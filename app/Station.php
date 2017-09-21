@@ -65,7 +65,7 @@ class Station
         $key = ($intent == 'rent') ? 'available' : 'free';
         $number = $this->status($key);
 
-        if($this->status('open') == 0) {
+        if($this->status('open') == 0 || $this->status('connected') == 0) {
             $message = "Station #$this->id is out of order.";
             if($single) $message .= " Go to an alternative station.";
         } elseif($number == 0) {
