@@ -48,10 +48,10 @@ class StationCheck extends Command {
                 $message = "Station #$station is full. Go to an alternative station.";
                 $this->error($message);
             } elseif($status['free'] <= 3) {
-                $message = "Only " . $status['free'] . " available spots to park at station #$station. Proceed at your own risk.";
+                $message = "Only " . $status['free'] . " available parking spots at station #$station. Proceed at your own risk.";
                 $this->error($message);
             } else {
-                $message = "Station #$station has " . $status['free'] . " parking spots.";
+                $message = "Station #$station has " . $status['free'] . " available parking spots.";
                 $this->info($message);
             }
         } else {
@@ -59,10 +59,10 @@ class StationCheck extends Command {
                 $message = "Station #$station is empty. Go to an alternative station.";
                 $this->error($message);
             } elseif($status['available'] <= 3) {
-                $message = "Only " . $status['free'] . " available bikes at station #$station. Proceed at your own risk.";
+                $message = "Only " . $status['available'] . " available bikes at station #$station. Proceed at your own risk.";
                 $this->error($message);
             } else {
-                $message = "Station #$station has " . $status['free'] . " bikes.";
+                $message = "Station #$station has " . $status['available'] . " bikes.";
                 $this->info($message);
             }
         }
