@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Library;
+namespace App\Libraries;
 
-class Valenbisi {
+class Valenbisi
+{
     /**
      * The API url
      *
@@ -13,7 +14,7 @@ class Valenbisi {
     /**
      * Request a station and parse XML output.
      *
-     * @return object
+     * @return SimpleXMLElement
      */
     public function getStation($station)
     {
