@@ -22,13 +22,21 @@ class Station
     protected $status;
 
     /**
+     * The station's nickname, if any.
+     *
+     * @var string
+     */
+    protected $nickname;
+
+    /**
      * Construct the Station object
      *
      * @return void
      */
-    public function __construct($stationId) {
-        $this->id = $stationId;
-        $this->fetchStatus();
+    public function __construct($station) {
+        $this->setId($station)
+             ->setNickname($station)
+             ->fetchStatus();
     }
 
     /**
@@ -39,6 +47,16 @@ class Station
     public function id()
     {
         return $this->id;
+    }
+
+    /**
+     * Get the ID of the station
+     *
+     * @return string
+     */
+    public function nickname()
+    {
+        return $this->nickname;
     }
 
     /**
@@ -62,23 +80,24 @@ class Station
      */
     public function notificationMessage($intent = 'rent', $single = true)
     {
+        $stationName = ($this->nickname) ? $this->nickname : "Station #$this->id";
         $key = ($intent == 'rent') ? 'available' : 'free';
         $number = $this->status($key);
 
         if($this->status('open') == 0 || $this->status('connected') == 0) {
-            $message = "Station #$this->id is out of order.";
+            $message = "$stationName is out of order.";
             if($single) $message .= " Go to an alternative station.";
         } elseif($number == 0) {
             $word = $this->word($intent, $number);
-            $message = "Station #$this->id has no $key $word.";
+            $message = "$stationName has no $key $word.";
             if($single) $message .= " Go to an alternative station.";
         } elseif($number <= 3) {
             $word = $this->word($intent, $number);
-            $message = "Only $number $word left at Station #$this->id.";
+            $message = "Only $number $word left at $stationName.";
             if($single) $message .= "Hurry!";
         } else {
             $word = $this->word($intent, $number);
-            $message = "Station #$this->id has $number $key $word.";
+            $message = "$stationName has $number $key $word.";
         }
 
         return $message;
@@ -118,5 +137,23 @@ class Station
         $key = ($number == 1) ? 'singular' : 'plural';
 
         return $words[$intent][$key];
+    }
+
+    private function setId($station)
+    {
+        $station = explode(":", $station);
+        $this->id = $station[0];
+
+        return $this;
+    }
+
+    private function setNickname($station)
+    {
+        $station = explode(":", $station);
+        if(isset($station[1])) {
+            $this->nickname = $station[1];
+        }
+
+        return $this;
     }
 }
