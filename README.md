@@ -12,12 +12,16 @@ and your intent: whether you'd like to `rent` or `park` a bike at the specified 
 /api/station/{station}/{intent}
 ```
 
-Alternatively, you can define a zone of your preferred stations, by providing a
-list of stations separated by a comma in order of preference (e.g. _10,222,34_).
+However, this service works best when you provide a _zone_ of stations. To do so, simply add
+each _Station ID_ separated by a comma in order of preference (e.g. _10,222,34_), and
+the app will warn you if your preferred station is out of, or nearly out of bikes/docks and offer alternatives
+based on your preferences.
+
 ```
 /api/zone/{stations...}/{intent}
 ```
 
-It then sends a request to an IFTTT webhook with a notification message, which can
-then be passed to the Notifications channel to receive it on your phone,
-or any other combination you can think of.
+After each call, the service sends a request to an IFTTT webhook with an event
+name `notify_station_status` and a notification message, which can then be passed
+to the Notifications channel to receive it on your phone, or any other combination
+you can think of.
