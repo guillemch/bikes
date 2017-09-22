@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Station;
 use App\Zone;
+use Illuminate\Http\Request;
 
 class ApiController extends Controller
 {
@@ -12,20 +13,20 @@ class ApiController extends Controller
      *
      * @return Response
      */
-    public function station($station, $intent = 'rent')
+    public function station($station, $intent = 'rent', Request $request)
     {
+        $silent = $request->input('silent');
+
         try {
             $station = new Station($station);
-            $station->notify($intent);
+            $station->notify($intent, $silent);
         } catch (\Exception $e) {
             return response()->json([
-                'status' => 'error',
                 'error' => $e->getMessage()
             ], 503);
         }
 
         return response()->json([
-            'status' => 'OK',
             'station' => $station->status(),
             'message' => $station->notificationMessage($intent)
         ], 200);
@@ -36,11 +37,13 @@ class ApiController extends Controller
      *
      * @return Response
      */
-    public function zone($stations, $intent = 'rent')
+    public function zone($stations, $intent = 'rent', Request $request)
     {
+        $silent = $request->input('silent');
+
         try {
             $zone = new Zone($stations);
-            $zone->notify($intent);
+            $zone->notify($intent, $silent);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',

@@ -78,7 +78,7 @@ class Station
      *
      * @return string
      */
-    public function notificationMessage($intent = 'rent', $single = true)
+    public function notificationMessage($intent = 'rent', $single = true, $silent = false)
     {
         $stationName = ($this->nickname) ? $this->nickname : "Station #$this->id";
         $key = ($intent == 'rent') ? 'available' : 'free';
@@ -94,10 +94,12 @@ class Station
         } elseif($number <= 3) {
             $word = $this->word($intent, $number);
             $message = "Only $number $word left at $stationName.";
-            if($single) $message .= "Hurry!";
-        } else {
+            if($single) $message .= " Hurry!";
+        } elseif(!$silent) {
             $word = $this->word($intent, $number);
             $message = "$stationName has $number $key $word.";
+        } else {
+            $message = null;
         }
 
         return $message;
@@ -108,11 +110,14 @@ class Station
      *
      * @return void
      */
-    public function notify($intent)
+    public function notify($intent, $silent = false)
     {
-        $message = $this->notificationMessage($intent);
-        $ifttt = new IFTTT;
-        $ifttt->submit('notify_station_status', $message);
+        $message = $this->notificationMessage($intent, true, $silent);
+
+        if(!empty($message)) {
+            $ifttt = new IFTTT;
+            $ifttt->submit('notify_station_status', $message);
+        }
     }
 
     /**

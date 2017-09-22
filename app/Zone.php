@@ -56,7 +56,7 @@ class Zone
      *
      * @return string
      */
-    public function notificationMessage($intent = 'rent')
+    public function notificationMessage($intent = 'rent', $silent = false)
     {
         $message = [];
         $key = ($intent == 'rent') ? 'available' : 'free';
@@ -70,7 +70,7 @@ class Zone
             $but = ($station->status($key) > 3 && $i != 1) ? 'But ' : '';
 
             // Push message
-            $message[] = $but . $station->notificationMessage($intent, false);
+            $message[] = $but . $station->notificationMessage($intent, false, $silent);
 
             // If we've reached a station with enough bikes/docks, stop composing.
             if($station->status($key) > 3) {
@@ -91,11 +91,14 @@ class Zone
      *
      * @return void
      */
-    public function notify($intent)
+    public function notify($intent, $silent = false)
     {
-        $message = $this->notificationMessage($intent);
-        $ifttt = new IFTTT;
-        $ifttt->submit('notify_station_status', $message);
+        $message = $this->notificationMessage($intent, $silent);
+
+        if(!empty($message)) {
+            $ifttt = new IFTTT;
+            $ifttt->submit('notify_station_status', $message);
+        }
     }
 
     /**
