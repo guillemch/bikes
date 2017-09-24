@@ -16,10 +16,11 @@ class ApiController extends Controller
     public function station($station, $intent = 'rent', Request $request)
     {
         $silent = $request->input('silent');
+        $call = $request->input('call');
 
         try {
             $station = new Station($station);
-            $station->notify($intent, $silent);
+            $station->notify($intent, $silent, $call);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => $e->getMessage()
@@ -40,10 +41,11 @@ class ApiController extends Controller
     public function zone($stations, $intent = 'rent', Request $request)
     {
         $silent = $request->input('silent');
+        $call = $request->input('call');
 
         try {
             $zone = new Zone($stations);
-            $zone->notify($intent, $silent);
+            $zone->notify($intent, $silent, $call);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',

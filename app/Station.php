@@ -110,13 +110,17 @@ class Station
      *
      * @return void
      */
-    public function notify($intent, $silent = false)
+    public function notify($intent, $silent = false, $call = false)
     {
         $message = $this->notificationMessage($intent, true, $silent);
 
         if(!empty($message)) {
             $ifttt = new IFTTT;
             $ifttt->submit('notify_station_status', $message);
+
+            if($call) {
+                $ifttt->submit('call_station_status', $message);
+            }
         }
     }
 
