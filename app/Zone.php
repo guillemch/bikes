@@ -70,6 +70,7 @@ class Zone
             $but = ($station->status($key) > 3 && $i != 1) ? 'But ' : '';
 
             // Push message
+            $silent = ($i == 1) ? $silent : false;
             $message[] = $but . $station->notificationMessage($intent, false, $silent);
 
             // If we've reached a station with enough bikes/docks, stop composing.
